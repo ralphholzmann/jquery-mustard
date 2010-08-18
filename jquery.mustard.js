@@ -82,10 +82,7 @@
                 'speed' : 200,
                 'timeout' : 1000
             },
-            'position' : {
-                'my' : 'bottom',
-                'at' : 'top'
-            }
+            'position' : 'top'
         },
         
         private = {
@@ -315,10 +312,11 @@
                         });
                         
                         var windowTimeout;
-                        $(window).bind('resize.' + pluginName + id, function(){
+                        $(window).bind('resize.' + pluginName + id + ' scroll.' + pluginName + id, function(){
                             clearTimeout(windowTimeout);
                             setTimeout(function(){
-                               methods.updatePosition.call(tooltip);                            
+                            
+                               methods.updatePosition.call(elements.target);                            
                             }, 100);
                         });
 
@@ -349,7 +347,7 @@
                     // Save it to element
                     $this.data(pluginName, {
                         elements : elements,
-                        settings : $.extend({}, settings),
+                        settings : $.extend(true, {}, settings, outerCss, innerCss),
                         id: id
                     });
                     
@@ -403,9 +401,12 @@
                     // Position tooltip
                     var data = $(this).data(pluginName);
                     if ( data ) {
-                        data.elements.tooltip.position( $.extend( data.settings.position, {
-                            of : data.elements.target
-                        }));                                   
+                        data.elements.tooltip.position({
+                            'my' : opposites[data.settings.position],
+                            'at' : data.settings.position,
+                            'of' : data.elements.target,
+                            'collision' : 'fit'
+                        });
                     }
 
                 });
@@ -419,6 +420,8 @@
         };
 
     $.fn[pluginName] = function( method ) {
+
+        console.log(typeof method);
 
         if ( methods[method] ) {
             return methods[method].apply( this, Array.prototype.slice.call( arguments, 1 ));

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Tests for tooltip plugin</title>
+        <script type="text/javascript" src="jquery.js"></script>
+        <script type="text/javascript" src="jquery.ui.position.js"></script>
+        <script type="text/javascript" src="jquery-mustard.js"></script>
+        <script>
+            $(function(){
+
+                
+                $.each([['info', 'top'], ['success', 'left'], ['notice', 'bottom'], ['error','right']], function( i, v ) {
+                
+                    $('li').eq(i).mustard({
+                        'content' : v[0] + ' tooltip on the ' + v[1] + '!',
+                        'position' : v[1],
+                        'css' : {
+                            'theme' : v[0]
+                        },
+                        'show' : {
+                            'event' : false
+                        },
+                        'hide' : {
+                            'event' : false
+                        }
+                    });
+                });
+
+            });
+        </script>
+        <style>
+            body {
+                padding: 200px;
+            }
+            li {
+                list-style: none outside none;
+                width: 100px;
+                height: 100px;
+                background-color: grey;
+                float: left;
+                margin-right: 200px
+            }
+        </style>
+    </head>
+    <body>
+        <ul>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+        </ul>
+    </body>
+</html>

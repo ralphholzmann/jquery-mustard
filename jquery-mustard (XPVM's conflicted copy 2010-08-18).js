@@ -1,7 +1,6 @@
 (function($, window, undefined) {
 
     var pluginName = 'mustard',
-        id = 0,
         opposites = {
             'left' : 'right',
             'right' : 'left',
@@ -11,7 +10,7 @@
         themes = {
             'success': {
                 'outer' : {
-                    'background-color' : '#C6D880'
+                    'background-color' : '#C6D880',
                 },
                 'inner' : {
                     'background-color' : '#E6EFC2',
@@ -20,7 +19,7 @@
             },
             'notice': {
                 'outer' : {
-                    'background-color' : '#FFD324'
+                    'background-color' : '#FFD324',
                 },
                 'inner' : {
                     'background-color' : '#FFF6BF',
@@ -29,29 +28,21 @@
             },
             'error': {
                 'outer' : {
-                    'background-color' : '#FBC2C4'
+                    'background-color' : '#FBC2C4',
                 },
                 'inner' : {
                     'background-color' : '#FBE3E4',
                     'color' : '#8a1f11'
                 }
-            },
-            'info': {
-                'outer' : {
-                    'background-color' : '#00529B'
-                },
-                'inner' : {
-                    'background-color' : '#BDE5F8',
-                    'color' : '#00529B'
-                }
             }
         },
-        tooltipTemplate = $('<div style="z-index: 1000; background: transparent; width: auto; height: auto; position: absolute; top: -10000px; left: -10000px" class="' + pluginName + '-tooltip"><div style="left: auto; top: auto; bottom: auto; right: auto; position: absolute; background-color: transparent;" class="' + pluginName + '-arrow"></div><div style="height: auto; left: auto; top: auto; bottom: auto; right: auto; position: relative; background-color: transparent;" class="' + pluginName + '-content"><div class="' + pluginName + '-wrap" style="height: auto"></div></div></div>'),
+        tooltipTemplate = $('<div style="z-index: 1000; background: transparent; height: auto; position: absolute; top: -10000px; left: -10000px" class="' + pluginName + '-tooltip"><div style="left: auto; top: auto; bottom: auto; right: auto; position: absolute; background-color: transparent;" class="' + pluginName + '-arrow"><canvas style="position: absolute;"></canvas></div><div style="height: auto; left: auto; top: auto; bottom: auto; right: auto; position: relative; background-color: transparent;" class="' + pluginName + '-content"><div class="' + pluginName + '-wrap" style="height: auto"></div></div></div>'),
         defaults = {
             'css' : {
                 'outer' : {
                     'font' : '12px/15px Helvetica, Arial, sans-serif',
                     'padding' : '4px',
+                    'width' : '200px',
                     '-moz-border-radius' : '6px',
                     '-webkit-border-radius' : '6px',
                     '-webkit-background-clip' : 'padding',
@@ -63,7 +54,7 @@
                     '-moz-border-radius' : '3px',
                     '-webkit-border-radius' : '3px',
                     '-webkit-background-clip' : 'padding',
-                    'border-radius' : '3px'
+                    'border-radius' : '3px',
                 }
             },
             'arrow' : {
@@ -107,8 +98,8 @@
                         innerCss;
                         
                         if ( options.css && options.css.theme ) {
-                            outerCss = $.extend({}, defaults.css.outer, themes[options.css.theme].outer )
-                            innerCss = $.extend({}, defaults.css.inner, themes[options.css.theme].inner )
+                            outerCss = $.extend({}, defaults.css.outer, themes[(options.css.theme || 'notice')].outer )
+                            innerCss = $.extend({}, defaults.css.inner, themes[(options.css.theme || 'notice')].inner )
                         } else {
                             outerCss = $.extend({}, defaults.css.outer, themes['notice'].outer )
                             innerCss = $.extend({}, defaults.css.inner, themes['notice'].inner )                        
@@ -121,7 +112,8 @@
                         // Grab tooltip
                         elements = $this.data(pluginName).elements;
                     }
-                        id++;
+                        
+                        
                         
                         // Create tooltip
                         tooltip = tooltipTemplate.clone();
@@ -130,14 +122,17 @@
                             content : tooltip.find('.' + pluginName + '-content').css($.extend(outerCss, { 'width' : 'auto'})),
                             wrap : tooltip.find('.' + pluginName + '-wrap').css($.extend(innerCss, { 'width' : 'auto'})).html( settings.content || $this.attr('title') ),
                             arrow : tooltip.find('.' + pluginName + '-arrow').css(settings.arrow),
+                            canvas : tooltip.find('canvas'),
                             target : $this
                         }
+                        
                         // Remove title attribute
                         $this.removeAttr('title');
                         
                         // Add tooltip to body 
                         elements.tooltip.appendTo('body');
-
+                    
+                        
                         // Apply styles and draw arrow
                         // Draw arrow
                         var w = parseInt(settings.arrow.width),
@@ -145,48 +140,18 @@
                             a = parseFloat(settings.angle),
                             t,
                             q = 0,
-                            r = 0;
-
-                        
-                        if ( ! $.browser.msie ) {
-                            // Use canvas
-                            elements.arrow.html('<canvas style="position: absolute;"></canvas>');
-                            elements.canvas = elements.arrow.children();
-                            var ctx = elements.canvas.attr('width', w).attr('height', h)[0].getContext("2d");
-                            ctx.fillStyle = outerCss['background-color'];
-                        } else {
-                            var color = outerCss['background-color'],
-                                coordsize = w + ',' + h
-                                
-                        }
-                        
-                        
+                            r = 0,
+                            ctx = elements.canvas.attr('width', w).attr('height', h)[0].getContext("2d");
+                        ctx.fillStyle = outerCss['background-color'];
                         
                         switch ( opposites[settings.position] ) {
                         
                             case 'left':
-                                if ( $.browser.msie ) {
-                                    var path = 'm' + 0 + ',' + Math.floor( h * a );
-                                    path += ' l' + w + ',' + h;
-                                    path += ' ' + w + ',' + 0;
-                                    path += ' xe';
-                                    
-                                    var vml = '<v:shape fillcolor="'+color+'" stroked="false" filled="true" path="'+path+'" coordsize="'+coordsize+'" ' +
-                                    'style="width:'+w+'px; height:'+h+'px; ' +
-                                    'line-height:0.1px; display:inline-block; behavior:url(#default#VML); position: absolute; right: 0;' +
-                                    '"></v:shape>'
-                                    
-                                    elements.arrow.html(vml)
-
-                                } else {
-                                    ctx.beginPath();
-                                    ctx.moveTo(0, h * a);
-                                    ctx.lineTo(w, h);
-                                    ctx.lineTo(w, 0);
-                                    ctx.fill();
-                                }
-
-                                
+                                ctx.beginPath();
+                                ctx.moveTo(0, h * a);
+                                ctx.lineTo(w, h);
+                                ctx.lineTo(w, 0);
+                                ctx.fill();
                                 t = (elements.tooltip.height() * a) - ( h * a )
                                 
                                 elements.tooltip.css('padding-left', w);
@@ -198,26 +163,11 @@
                                 break;
                             
                             case 'right':
-                                if ( $.browser.msie ) {
-                                    var path = 'm' + w + ',' + Math.floor( h * a );
-                                    path += ' l' + 0 + ',' + h;
-                                    path += ' ' + 0 + ',' + 0;
-                                    path += ' xe';
-                                    
-                                    var vml = '<v:shape fillcolor="'+color+'" stroked="false" filled="true" path="'+path+'" coordsize="'+coordsize+'" ' +
-                                    'style="width:'+w+'px; height:'+h+'px; ' +
-                                    'line-height:0.1px; display:inline-block; behavior:url(#default#VML);position: absolute; left: -1px;' +
-                                    '"></v:shape>'
-                                    
-                                    elements.arrow.html(vml)
-
-                                } else {
-                                    ctx.beginPath();
-                                    ctx.moveTo(w, h * a);
-                                    ctx.lineTo(0, h);
-                                    ctx.lineTo(0, 0);
-                                    ctx.fill();
-                                }
+                                ctx.beginPath();
+                                ctx.moveTo(w, h * a);
+                                ctx.lineTo(0, h);
+                                ctx.lineTo(0, 0);
+                                ctx.fill();
                                 t = (elements.tooltip.height() * a) - ( h * a )
                                 elements.tooltip.css('padding-right', w);
                                 elements.arrow.css({
@@ -228,26 +178,11 @@
                                 break;
 
                             case 'top':
-                                if ( $.browser.msie ) {
-                                    var path = 'm' + Math.floor( w * a ) + ',' + 0;
-                                    path += ' l' + 0 + ',' + h;
-                                    path += ' ' + w + ',' + h;
-                                    path += ' xe';
-                                    
-                                    var vml = '<v:shape fillcolor="'+color+'" stroked="false" filled="true" path="'+path+'" coordsize="'+coordsize+'" ' +
-                                    'style="width:'+w+'px; height:'+h+'px; ' +
-                                    'line-height:0.1px; display:inline-block; behavior:url(#default#VML);position: absolute; bottom: 0' +
-                                    '"></v:shape>'
-                                    
-                                    elements.arrow.html(vml)
-
-                                } else {
-                                    ctx.beginPath();
-                                    ctx.moveTo(w * a, 0);
-                                    ctx.lineTo(0, h);
-                                    ctx.lineTo(w, h);
-                                    ctx.fill();
-                                }
+                                ctx.beginPath();
+                                ctx.moveTo(w * a, 0);
+                                ctx.lineTo(0, h);
+                                ctx.lineTo(w, h);
+                                ctx.fill();
                                 t = (elements.tooltip.width() * a) - ( w * a );
                                 elements.tooltip.css('padding-top', h);
                                 elements.arrow.css({
@@ -258,26 +193,11 @@
                                 break;
 
                             case 'bottom':
-                                if ( $.browser.msie ) {
-                                    var path = 'm' + Math.floor( w * a ) + ',' + h;
-                                    path += ' l' + 0 + ',' + 0;
-                                    path += ' ' + w + ',' + 0;
-                                    path += ' xe';
-                                    
-                                    var vml = '<v:shape fillcolor="'+color+'" stroked="false" filled="true" path="'+path+'" coordsize="'+coordsize+'" ' +
-                                    'style="width:'+w+'px; height:'+h+'px; ' +
-                                    'line-height:0.1px; display:inline-block; behavior:url(#default#VML);position: absolute; top: -1px;' +
-                                    '"></v:shape>'
-                                    
-                                    elements.arrow.html(vml)
-
-                                } else {
-                                    ctx.beginPath();
-                                    ctx.moveTo(w * a, h);
-                                    ctx.lineTo(0, 0);
-                                    ctx.lineTo(w, 0);
-                                    ctx.fill();
-                                }
+                                ctx.beginPath();
+                                ctx.moveTo(w * a, h);
+                                ctx.lineTo(0, 0);
+                                ctx.lineTo(w, 0);
+                                ctx.fill();
                                 t = (elements.tooltip.width() * a) - ( w * a );
                                 elements.tooltip.css('padding-bottom', h);
                                 elements.arrow.css({
@@ -315,10 +235,10 @@
                         });
                         
                         var windowTimeout;
-                        $(window).bind('resize.' + pluginName + id, function(){
+                        $(window).bind('resize', function(){
                             clearTimeout(windowTimeout);
                             setTimeout(function(){
-                               methods.updatePosition.call(tooltip);                            
+                               // methods.updatePosition.call(tooltip);                            
                             }, 100);
                         });
 
@@ -349,65 +269,21 @@
                     // Save it to element
                     $this.data(pluginName, {
                         elements : elements,
-                        settings : $.extend({}, settings),
-                        id: id
+                        settings : $.extend({}, settings)
                     });
                     
                     
                 });
             },
-            hide : function() {
-                return this.each(function(){
-                
-                    var data = $(this).data(pluginName);
-                    if ( data ) {
-                        data.elements.tooltip[ data.settings.hide.method ]( data.settings.hide.speed );
-                    }
-                
-                });
-            },
-            show : function() {
-                return this.each(function(){
-                
-                    var data = $(this).data(pluginName);
-                    if ( data ) {
-                        data.elements.tooltip[ data.settings.show.method ]( data.settings.show.speed );
-                    }
-                
-                });
-            },
-            destroy : function() {
-                return this.each(function(){
-                
-                    var data = $(this).data( pluginName );
-                    
-                    if ( data ) {
-                        
-                        // Unbind window resize
-                        $(window).unbind('.' + pluginName + id);
-                        
-                        // Unbind element listeners
-                        $(this).unbind('.' + pluginName);
-                        
-                        // Destroy tooltip
-                        data.elements.tooltip.remove();
-                        
-                        delete( data);
-                    }
-                
-                });
-            },
+            
             updatePosition : function() {
             
                 return this.each(function(){
                     // Position tooltip
                     var data = $(this).data(pluginName);
-                    if ( data ) {
-                        data.elements.tooltip.position( $.extend( data.settings.position, {
-                            of : data.elements.target
-                        }));                                   
-                    }
-
+                    data.elements.tooltip.position( $.extend( data.settings.position, {
+                        of : data.elements.target
+                    }));                
                 });
             },
             

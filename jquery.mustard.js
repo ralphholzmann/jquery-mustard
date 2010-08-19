@@ -1,6 +1,14 @@
 (function($, window, undefined) {
 
     var pluginName = 'mustard',
+        rgba = (function(){
+            try {
+                $('<div />').css('background-color', 'rgba(1,2,3,.4)');
+                return true;
+            } catch ( e ) {
+                return false;
+            }
+        })(),
         id = 0,
         opposites = {
             'left' : 'right',
@@ -11,7 +19,7 @@
         themes = {
             'success': {
                 'outer' : {
-                    'background-color' : 'rgba(198, 216, 128, .6)'
+                    'background-color' : rgba ? 'rgba(198, 216, 128, .6)' : '#C6D880'
                 },
                 'inner' : {
                     'background-color' : '#E6EFC2',
@@ -20,7 +28,7 @@
             },
             'notice': {
                 'outer' : {
-                    'background-color' : 'rgba(255, 211, 36, .6)'
+                    'background-color' : rgba ? 'rgba(255, 211, 36, .6)' : '#FFD324'
                 },
                 'inner' : {
                     'background-color' : '#FFF6BF',
@@ -29,7 +37,7 @@
             },
             'error': {
                 'outer' : {
-                    'background-color' : 'rgba(251, 194, 196, .6)'
+                    'background-color' : rgba ? 'rgba(251, 194, 196, .6)' : '#FBC2C4'
                 },
                 'inner' : {
                     'background-color' : '#FBE3E4',
@@ -38,7 +46,7 @@
             },
             'info': {
                 'outer' : {
-                    'background-color' : 'rgba(0, 82, 155, .6)'
+                    'background-color' : rgba ? 'rgba(0, 82, 155, .6)' : '#00529B'
                 },
                 'inner' : {
                     'background-color' : '#BDE5F8',
@@ -94,7 +102,6 @@
         methods = {
 
             init : function( options ) {
-                
                 var settings = options ? $.extend(true, {}, defaults, options ) : defaults;
                 return this.each(function(){
 

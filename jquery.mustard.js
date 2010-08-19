@@ -11,7 +11,7 @@
         themes = {
             'success': {
                 'outer' : {
-                    'background-color' : '#C6D880'
+                    'background-color' : 'rgba(198, 216, 128, .6)'
                 },
                 'inner' : {
                     'background-color' : '#E6EFC2',
@@ -20,7 +20,7 @@
             },
             'notice': {
                 'outer' : {
-                    'background-color' : '#FFD324'
+                    'background-color' : 'rgba(255, 211, 36, .6)'
                 },
                 'inner' : {
                     'background-color' : '#FFF6BF',
@@ -29,7 +29,7 @@
             },
             'error': {
                 'outer' : {
-                    'background-color' : '#FBC2C4'
+                    'background-color' : 'rgba(251, 194, 196, .6)'
                 },
                 'inner' : {
                     'background-color' : '#FBE3E4',
@@ -38,7 +38,7 @@
             },
             'info': {
                 'outer' : {
-                    'background-color' : '#00529B'
+                    'background-color' : 'rgba(0, 82, 155, .6)'
                 },
                 'inner' : {
                     'background-color' : '#BDE5F8',
@@ -46,7 +46,7 @@
                 }
             }
         },
-        tooltipTemplate = $('<div style="z-index: 1000; background: transparent; width: auto; height: auto; position: absolute; top: -10000px; left: -10000px" class="' + pluginName + '-tooltip"><div style="left: auto; top: auto; bottom: auto; right: auto; position: absolute; background-color: transparent;" class="' + pluginName + '-arrow"></div><div style="height: auto; left: auto; top: auto; bottom: auto; right: auto; position: relative; background-color: transparent;" class="' + pluginName + '-content"><div class="' + pluginName + '-wrap" style="height: auto"></div></div></div>'),
+        tooltipTemplate = $('<div style="z-index: 1000; background: transparent; width: auto; height: auto; position: absolute; top: -10000px; left: -10000px" class="' + pluginName + '-tooltip"><div style="left: auto; top: auto; bottom: auto; right: auto; position: absolute; background-color: transparent; z-index: 1001" class="' + pluginName + '-arrow"></div><div style="height: auto; left: auto; top: auto; bottom: auto; right: auto; position: relative; background-color: transparent;" class="' + pluginName + '-content"><div class="' + pluginName + '-wrap" style="height: auto"></div></div></div>'),
         defaults = {
             'css' : {
                 'outer' : {
@@ -55,7 +55,9 @@
                     '-moz-border-radius' : '6px',
                     '-webkit-border-radius' : '6px',
                     '-webkit-background-clip' : 'padding',
-                    'border-radius' : '6px'
+                    'border-radius' : '6px',
+                    '-webkit-box-shadow' : '0 0 6px #aaa',
+                    '-moz-box-shadow' : '0 0 6px #aaa'
                 },
                 'inner' : {
                     'font' : '12px/15px Helvetica, Arial, sans-serif',
@@ -116,7 +118,8 @@
                     if ( $this.data(pluginName) ) {
                         
                         // Grab tooltip
-                        elements = $this.data(pluginName).elements;
+                        methods.updatePosition.call($this.data(pluginName).elements.target);
+                        return;
                     }
                         id++;
                         
@@ -349,7 +352,7 @@
                         elements : elements,
                         settings : $.extend(true, {}, settings, outerCss, innerCss),
                         id: id
-                    });
+                    }).addClass('mustardized');
                     
                     
                 });
@@ -385,7 +388,7 @@
                         $(window).unbind('.' + pluginName + id);
                         
                         // Unbind element listeners
-                        $(this).unbind('.' + pluginName);
+                        $(this).unbind('.' + pluginName).removeClass('mustardized');
                         
                         // Destroy tooltip
                         data.elements.tooltip.remove();
@@ -420,8 +423,6 @@
         };
 
     $.fn[pluginName] = function( method ) {
-
-        console.log(typeof method);
 
         if ( methods[method] ) {
             return methods[method].apply( this, Array.prototype.slice.call( arguments, 1 ));

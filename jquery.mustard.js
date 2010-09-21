@@ -368,7 +368,7 @@
 					$(window).bind('resize.' + pluginName + id + ' scroll.' + pluginName + id, function(){
 						clearTimeout(windowTimeout);
 						setTimeout(function(){
-						   methods.updatePosition.call(elements.target);							
+						   methods.updatePosition.call(elements.tooltip);							
 						}, 500);
 					});
 

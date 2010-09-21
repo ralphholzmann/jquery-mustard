@@ -332,7 +332,7 @@
 						$this.add(tooltip).bind(settings.show.event + '.' + pluginName, function() {
 	
 							
-							methods.updatePosition.call( tooltip )
+							methods.updatePosition.call( elements.target )
 							// Stop from hiding tooltip
 							clearTimeout(hideTimeout);
 							setTimeout(function(){
@@ -368,7 +368,7 @@
 					$(window).bind('resize.' + pluginName + id + ' scroll.' + pluginName + id, function(){
 						clearTimeout(windowTimeout);
 						setTimeout(function(){
-						   methods.updatePosition.call(elements.tooltip);							
+						   methods.updatePosition.call(elements.target);							
 						}, 500);
 					});
 
@@ -463,13 +463,16 @@
 			
 			},
 			updatePosition : function() {
-			
+				console.log('updating Position for ' + data.id);
 				if ( data ) {
 					if (data.elements.target.is(':hidden')) {
+						console.log('target hidden');
 						methods.hide.call(data.elements.target);
 						return;
 					}
+
 					if (data.elements.tooltip.is(':visible')) {
+						console.log('visible');
 						if ( ! data.elements.tooltip.is(':animated')) {
 							  data.elements.tooltip.position({
 								  'my' : opposites[data.settings.position],
@@ -483,6 +486,7 @@
 						 	});
 						}
 					} else {
+						console.log('hidden');
 						 data.elements.tooltip.css({
 							'visibility' : 'hidden'
 						}).show().position({

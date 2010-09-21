@@ -462,7 +462,6 @@
 			
 			},
 			updatePosition : function() {
-				console.log(data.id);
 				if ( data ) {
 					if (data.elements.target.is(':hidden')) {
 						methods.hide.call(data.elements.target);

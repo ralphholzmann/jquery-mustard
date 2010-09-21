@@ -364,15 +364,16 @@
 						}
 					});
 					
-					(function( elements, id){
+					if ( ! $(window).data('mustard')) {
 						var windowTimeout;
-						$(window).bind('resize.' + pluginName + id + ' scroll.' + pluginName + id, function(){
+						$(window).bind('resize.' + pluginName + ' scroll.' + pluginName, function(){
 							clearTimeout(windowTimeout);
 							setTimeout(function(){
-							   methods.updatePosition.call(elements.target);							
+								$('.mustardized')[pluginName]('updatePosition');
 							}, 500);
 						});
-					})(elements, id);
+						$(window).data('mustard', true);
+					}
 
 				
 
@@ -461,7 +462,7 @@
 			
 			},
 			updatePosition : function() {
-			
+				console.log(data.id);
 				if ( data ) {
 					if (data.elements.target.is(':hidden')) {
 						methods.hide.call(data.elements.target);

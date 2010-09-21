@@ -1,10 +1,9 @@
-(function($, window, undefined) {
+(function($, window, pluginName, undefined) {
 
 
 
 
-	var pluginName = 'mustard',
-		collection = [],
+	var collection = [],
 		activeElement,
 		data,
 		rgba = (function(){
@@ -124,7 +123,15 @@
 						outerCss = $.extend({}, defaults.css.outer, themes['notice'].outer )
 						innerCss = $.extend({}, defaults.css.inner, themes['notice'].inner )						
 					}
-			   
+
+					if ( options && options.css && options.css.outer ) {
+						$.extend(outerCss, options.css.outer )
+					}
+
+					if ( options && options.css && options.css.inner ) {
+						$.extend(innerCss, options.css.inner )
+					}
+
 					
 					// Get tooltip
 					if ( data ) {
@@ -324,6 +331,8 @@
 						// Bind hide and show events
 						$this.add(tooltip).bind(settings.show.event + '.' + pluginName, function() {
 	
+							
+							methods.updatePosition.call( tooltip )
 							// Stop from hiding tooltip
 							clearTimeout(hideTimeout);
 							setTimeout(function(){
@@ -521,4 +530,4 @@
 		});
 	};
 
-})(jQuery, window);
+})(jQuery, window, 'mustard');

@@ -14,13 +14,15 @@
 						$(v).mustard({
 							'content' : 'this is a tooltip',
 							'css' : {
-								'theme' : themes[( i % 4 )]
-							},
-							'show' : {
-								'event' : false
-							},
-							'hide' : {
-								'event' : false
+								'theme' : themes[( i % 4 )],
+					            'outer' : {
+					                'background-color' : '#FFF',
+					                'padding' : '1px'
+					            },
+					            'inner' : {
+					                'background-color' : '#000',
+					                'color' : '#FFF'
+					            }
 							}
 						});					
 					})(i)
@@ -50,6 +52,7 @@
             body {
                 padding: 200px;
                 background: transparent url('background.png') repeat scroll center;
+                height: 3000px;
             }
             li {
                 list-style: none outside none;

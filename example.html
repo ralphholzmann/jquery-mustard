@@ -7,8 +7,26 @@
         <script type="text/javascript" src="jquery.mustard.js"></script>
         <script>
             $(function(){
-
-                
+				var themes = ['info', 'success', 'error', 'notice'];
+				
+				$('li').each(function(i, v){
+					(function(i){
+						$(v).mustard({
+							'content' : 'this is a tooltip',
+							'css' : {
+								'theme' : themes[( i % 4 )]
+							},
+							'show' : {
+								'event' : false
+							},
+							'hide' : {
+								'event' : false
+							}
+						});					
+					})(i)
+				});
+				
+                /** /
                 $.each([['info', 'top'], ['success', 'left'], ['notice', 'bottom'], ['error','right']], function( i, v ) {
                 
                     $('li').eq(i).mustard({
@@ -25,7 +43,7 @@
                         }
                     });
                 });
-
+				/**/
             });
         </script>
         <style>
@@ -35,17 +53,31 @@
             }
             li {
                 list-style: none outside none;
-                width: 100px;
-                height: 100px;
+                width: 30px;
+                height: 30px;
                 background-color: grey;
                 float: left;
-                margin-right: 150px;
+                margin-right: 10px;
                 margin-bottom: 50px;
             }
         </style>
     </head>
     <body>
         <ul>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
             <li></li>
             <li></li>
             <li></li>

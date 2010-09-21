@@ -364,17 +364,15 @@
 						}
 					});
 					
-					var windowTimeout;
-					$(window).bind('resize.' + pluginName + id + ' scroll.' + pluginName + id, function(){
-						clearTimeout(windowTimeout);
-						setTimeout(function(){
-						   methods.updatePosition.call(elements.target);							
-						}, 500);
-					});
-
-
-
-
+					(function( elements, id){
+						var windowTimeout;
+						$(window).bind('resize.' + pluginName + id + ' scroll.' + pluginName + id, function(){
+							clearTimeout(windowTimeout);
+							setTimeout(function(){
+							   methods.updatePosition.call(elements.target);							
+							}, 500);
+						});
+					})(elements, id);
 
 				
 
@@ -463,16 +461,13 @@
 			
 			},
 			updatePosition : function() {
-				console.log('updating Position for ' + data.id);
+			
 				if ( data ) {
 					if (data.elements.target.is(':hidden')) {
-						console.log('target hidden');
 						methods.hide.call(data.elements.target);
 						return;
 					}
-
 					if (data.elements.tooltip.is(':visible')) {
-						console.log('visible');
 						if ( ! data.elements.tooltip.is(':animated')) {
 							  data.elements.tooltip.position({
 								  'my' : opposites[data.settings.position],
@@ -486,7 +481,6 @@
 						 	});
 						}
 					} else {
-						console.log('hidden');
 						 data.elements.tooltip.css({
 							'visibility' : 'hidden'
 						}).show().position({

@@ -324,10 +324,6 @@
 					}
 
 					if ( settings.show.event ) {
-
-
-
-
 						// Bind hide and show events
 						$this.add(tooltip).bind(settings.show.event + '.' + pluginName, function() {
 	
@@ -337,7 +333,7 @@
 							clearTimeout(hideTimeout);
 							setTimeout(function(){
 						 
-								tooltip[settings.show.method](settings.show.speed);
+								tooltip.stop(true, true)[settings.show.method](settings.show.speed);
 							}, settings.show.timeout );
 						
 						});						   
@@ -348,7 +344,7 @@
 					$this.add(tooltip).bind(settings.hide.event + '.' + pluginName, function(){
 						
 						hideTimeout = setTimeout(function(){
-							tooltip[settings.hide.method](settings.hide.speed);						   
+							tooltip.stop(true, true)[settings.hide.method](settings.hide.speed);						   
 						}, settings.hide.timeout );
 					
 					}).bind('mouseenter', function(){
@@ -372,7 +368,7 @@
 								$('.mustardized')[pluginName]('updatePosition');
 							}, 500);
 						});
-						$(window).data('mustard', true);
+						$(window).data(pluginName, true);
 					}
 
 				
@@ -407,7 +403,7 @@
 				collection.push(elements.tooltip);
 			},
 			hide : function( callback ) {
-				
+				var data = $(this).data( pluginName );
 				data && data.elements.tooltip[ data.settings.hide.method ]( data.settings.hide.speed , ( callback || data.settings.hide.callback || $.noop ));
 
 
@@ -416,7 +412,7 @@
 
 			},
 			show : function( callback ) {
-				
+				var data = $(this).data( pluginName );
 				data && data.elements.tooltip[ data.settings.show.method ]( data.settings.show.speed , ( callback || data.settings.show.callback || $.noop ));
 				
 			},
@@ -462,6 +458,9 @@
 			
 			},
 			updatePosition : function() {
+
+				var data = $(this).data( pluginName );
+				console.log(data.id);
 				if ( data ) {
 					if (data.elements.target.is(':hidden')) {
 						methods.hide.call(data.elements.target);

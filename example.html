@@ -7,37 +7,25 @@
         <script type="text/javascript" src="jquery.mustard.js"></script>
         <script>
             $(function(){
-				var themes = ['info', 'success', 'error', 'notice'];
+				var themes = [['info', 'left'], ['success', 'right'], ['error', 'top'], ['notice', 'bottom']];
 				
 				$('li').each(function(i, v){
 					(function(i){
 						$(v).mustard({
 							'content' : 'this is a tooltip',
 							'css' : {
-								'theme' : themes[( i % 4 )]
+								'theme' : themes[( i % themes.length )][0]
+							},
+							'position' : themes[( i % themes.length )][1],
+							'show' : {
+								'event' : false
+							},
+							'hide' : {
+								'event' : false
 							}
 						});					
 					})(i)
 				});
-				
-                /** /
-                $.each([['info', 'top'], ['success', 'left'], ['notice', 'bottom'], ['error','right']], function( i, v ) {
-                
-                    $('li').eq(i).mustard({
-                        'content' : v[0] + ' tooltip on the ' + v[1] + '!',
-                        'position' : v[1],
-                        'css' : {
-                            'theme' : v[0]
-                        },
-                        'show' : {
-                            'event' : false
-                        },
-                        'hide' : {
-                            'event' : false
-                        }
-                    });
-                });
-				/**/
             });
         </script>
         <style>
@@ -52,8 +40,8 @@
                 height: 30px;
                 background-color: grey;
                 float: left;
-                margin-right: 10px;
-                margin-bottom: 50px;
+                margin-right: 140px;
+                margin-bottom: 140px;
             }
         </style>
     </head>

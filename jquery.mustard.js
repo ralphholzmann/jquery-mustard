@@ -1,19 +1,17 @@
 (function($, window, pluginName, undefined) {
-
-
-
-
 	var collection = [],
 		activeElement,
-		data,
-		rgba = (function(){
-			try {
-				$('<div />').css('background-color', 'rgba(1,2,3,.4)');
-				return true;
-			} catch ( e ) {
-				return false;
-			}
-		})(),
+		support = {
+			canvas : !! document.createElement( 'canvas' ).getContext,
+			rgba : (function(){
+				try {
+					$('<div />').css('background-color', 'rgba(1,2,3,.4)');
+					return true;
+				} catch ( e ) {
+					return false;
+				}
+			})()
+		},
 		id = 0,
 		opposites = {
 			'left' : 'right',
@@ -24,7 +22,7 @@
 		themes = {
 			'success': {
 				'outer' : {
-					'background-color' : rgba ? 'rgba(198, 216, 128, .8)' : '#C6D880'
+					'background-color' : support.rgba ? 'rgba(198, 216, 128, .8)' : '#C6D880'
 				},
 				'inner' : {
 					'background-color' : '#E6EFC2',
@@ -33,7 +31,7 @@
 			},
 			'notice': {
 				'outer' : {
-					'background-color' : rgba ? 'rgba(255, 211, 36, .8)' : '#FFD324'
+					'background-color' : support.rgba ? 'rgba(255, 211, 36, .8)' : '#FFD324'
 				},
 				'inner' : {
 					'background-color' : '#FFF6BF',
@@ -42,7 +40,7 @@
 			},
 			'error': {
 				'outer' : {
-					'background-color' : rgba ? 'rgba(251, 194, 196, .8)' : '#FBC2C4'
+					'background-color' : support.rgba ? 'rgba(251, 194, 196, .8)' : '#FBC2C4'
 				},
 				'inner' : {
 					'background-color' : '#FBE3E4',
@@ -51,7 +49,7 @@
 			},
 			'info': {
 				'outer' : {
-					'background-color' : rgba ? 'rgba(0, 82, 155, .8)' : '#00529B'
+					'background-color' : support.rgba ? 'rgba(0, 82, 155, .8)' : '#00529B'
 				},
 				'inner' : {
 					'background-color' : '#BDE5F8',
@@ -104,311 +102,213 @@
 		
 		methods = {
 
-
-
-
 			init : function( options ) {
+
 				var settings = options ? $.extend(true, {}, defaults, options ) : defaults,
 					$this = $(this),
-					tooltip,
-					elements,
-					hideTimeout,
-					outerCss,
-					innerCss;
+					data = $this.data( pluginName ),
+					windowTimeout, tooltip, elements, hideTimeout, outerCss, innerCss;
 					
-					if ( options && options.css && options.css.theme ) {
-						outerCss = $.extend({}, defaults.css.outer, themes[options.css.theme].outer )
-						innerCss = $.extend({}, defaults.css.inner, themes[options.css.theme].inner )
-					} else {
-						outerCss = $.extend({}, defaults.css.outer, themes['notice'].outer )
-						innerCss = $.extend({}, defaults.css.inner, themes['notice'].inner )						
-					}
+				
+				if ( options && options.css && options.css.theme ) {
+					outerCss = $.extend({}, defaults.css.outer, themes[options.css.theme].outer );
+					innerCss = $.extend({}, defaults.css.inner, themes[options.css.theme].inner );
+				} else {
+					outerCss = $.extend({}, defaults.css.outer, themes['notice'].outer );
+					innerCss = $.extend({}, defaults.css.inner, themes['notice'].inner );						
+				}
 
-					if ( options && options.css && options.css.outer ) {
-						$.extend(outerCss, options.css.outer )
-					}
+				if ( options && options.css && options.css.outer ) {
+					$.extend(outerCss, options.css.outer )
+				}
 
-					if ( options && options.css && options.css.inner ) {
-						$.extend(innerCss, options.css.inner )
-					}
-
-					
-					// Get tooltip
-					if ( data ) {
-						
-						settings.content && data.elements.wrap.html( settings.content ) && methods.updatePosition.call( data.tooltip );
-						
-						// Grab tooltip
-						methods.show.call($this);
-						return;
-					}
-
-					id++;
-					
-					// Create tooltip
-					tooltip = tooltipTemplate.clone();
-					elements = {
-						tooltip : tooltip,
-						content : tooltip.find('.' + pluginName + '-content').css($.extend(outerCss, { 'width' : 'auto'})),
-						wrap : tooltip.find('.' + pluginName + '-wrap').css($.extend(innerCss, { 'width' : 'auto'})).html( settings.content || $this.attr('title') ),
-						arrow : tooltip.find('.' + pluginName + '-arrow').css(settings.arrow),
-						target : $this
-					}
-
-
-
-
-					data = {
-						elements : elements,
-						settings : $.extend(true, {}, settings, outerCss, innerCss),
-						id: id
-					}
-
-					// Remove title attribute
-					$this.removeAttr('title');
-					
-					// Add tooltip to body 
-					elements.tooltip.appendTo('body');
-					// Apply styles and draw arrow
-					// Draw arrow
-					var w = parseInt(settings.arrow.width, 10),
-						h = parseInt(settings.arrow.height, 10),
-						a = parseFloat(settings.angle),
-						t,
-						q = 0,
-						r = 0;
-
-
-
-
-					
-					if ( ! $.browser.msie ) {
-						// Use canvas
-						elements.arrow.html('<canvas style="position: absolute;"></canvas>');
-						elements.canvas = elements.arrow.children();
-						var ctx = elements.canvas.attr('width', w).attr('height', h)[0].getContext("2d");
-						ctx.fillStyle = outerCss['background-color'];
-					} else {
-						var color = outerCss['background-color'],
-							coordsize = w + ',' + h
-							
-					}
-					
-					
-					
-					switch ( opposites[settings.position] ) {
-					
-						case 'left':
-							if ( $.browser.msie ) {
-								var path = 'm' + 0 + ',' + Math.floor( h * a );
-								path += ' l' + w + ',' + h;
-								path += ' ' + w + ',' + 0;
-								path += ' xe';
-								
-								var vml = '<v:shape fillcolor="'+color+'" stroked="false" filled="true" path="'+path+'" coordsize="'+coordsize+'" ' +
-								'style="width:'+w+'px; height:'+h+'px; ' +
-								'line-height:0.1px; display:inline-block; behavior:url(#default#VML); position: absolute; right: 0;' +
-								'"></v:shape>'
-								
-								elements.arrow.html(vml)
-
-							} else {
-								ctx.beginPath();
-								ctx.moveTo(0, h * a);
-								ctx.lineTo(w, h);
-								ctx.lineTo(w, 0);
-								ctx.fill();
-							}
-
-							
-							t = (elements.tooltip.height() * a) - ( h * a )
-							
-							elements.tooltip.css('padding-left', w);
-							elements.arrow.css({
-								left : 0,
-								top : (elements.tooltip.height() * a) - ( h * a )
-							})
-							r = (elements.tooltip.height() * .5) - ( w * .5 ) - t;
-							break;
-						
-						case 'right':
-							if ( $.browser.msie ) {
-								var path = 'm' + w + ',' + Math.floor( h * a );
-								path += ' l' + 0 + ',' + h;
-								path += ' ' + 0 + ',' + 0;
-								path += ' xe';
-								
-								var vml = '<v:shape fillcolor="'+color+'" stroked="false" filled="true" path="'+path+'" coordsize="'+coordsize+'" ' +
-								'style="width:'+w+'px; height:'+h+'px; ' +
-								'line-height:0.1px; display:inline-block; behavior:url(#default#VML);position: absolute; left: -1px;' +
-								'"></v:shape>'
-								
-								elements.arrow.html(vml)
-
-							} else {
-								ctx.beginPath();
-								ctx.moveTo(w, h * a);
-								ctx.lineTo(0, h);
-								ctx.lineTo(0, 0);
-								ctx.fill();
-							}
-							t = (elements.tooltip.height() * a) - ( h * a )
-							elements.tooltip.css('padding-right', w);
-							elements.arrow.css({
-								right : 0,
-								top : t
-							})
-							r = (elements.tooltip.height() * .5) - ( w * .5 ) - t;
-							break;
-
-						case 'top':
-							if ( $.browser.msie ) {
-								var path = 'm' + Math.floor( w * a ) + ',' + 0;
-								path += ' l' + 0 + ',' + h;
-								path += ' ' + w + ',' + h;
-								path += ' xe';
-								
-								var vml = '<v:shape fillcolor="'+color+'" stroked="false" filled="true" path="'+path+'" coordsize="'+coordsize+'" ' +
-								'style="width:'+w+'px; height:'+h+'px; ' +
-								'line-height:0.1px; display:inline-block; behavior:url(#default#VML);position: absolute; bottom: 0' +
-								'"></v:shape>'
-								
-								elements.arrow.html(vml)
-
-							} else {
-								ctx.beginPath();
-								ctx.moveTo(w * a, 0);
-								ctx.lineTo(0, h);
-								ctx.lineTo(w, h);
-								ctx.fill();
-							}
-							t = (elements.tooltip.width() * a) - ( w * a );
-							elements.tooltip.css('padding-top', h);
-							elements.arrow.css({
-								top: 0,
-								left : t
-							})
-							 q = (elements.tooltip.width() * .5) - ( w * .5 ) - t;
-							break;
-
-						case 'bottom':
-							if ( $.browser.msie ) {
-								var path = 'm' + Math.floor( w * a ) + ',' + h;
-								path += ' l' + 0 + ',' + 0;
-								path += ' ' + w + ',' + 0;
-								path += ' xe';
-								
-								var vml = '<v:shape fillcolor="'+color+'" stroked="false" filled="true" path="'+path+'" coordsize="'+coordsize+'" ' +
-								'style="width:'+w+'px; height:'+h+'px; ' +
-								'line-height:0.1px; display:inline-block; behavior:url(#default#VML);position: absolute; top: -1px;' +
-								'"></v:shape>'
-								
-								elements.arrow.html(vml)
-
-							} else {
-								ctx.beginPath();
-								ctx.moveTo(w * a, h);
-								ctx.lineTo(0, 0);
-								ctx.lineTo(w, 0);
-								ctx.fill();
-							}
-							t = (elements.tooltip.width() * a) - ( w * a );
-							elements.tooltip.css('padding-bottom', h);
-							elements.arrow.css({
-								bottom: 0,
-								left : (elements.tooltip.width() * a) - ( w * a )
-							})
-							 q = ((elements.tooltip.width() * .5) - ( w * .5 )) - t
-							break;
-
-					}
-
-					if ( settings.show.event ) {
-						// Bind hide and show events
-						$this.add(tooltip).bind(settings.show.event + '.' + pluginName, function() {
-	
-							
-							methods.updatePosition.call( elements.target )
-							// Stop from hiding tooltip
-							clearTimeout(hideTimeout);
-							setTimeout(function(){
-						 
-								tooltip.stop(true, true)[settings.show.method](settings.show.speed);
-							}, settings.show.timeout );
-						
-						});						   
-					} else {
-						tooltip[settings.show.method](settings.show.speed);
-					}
-					
-					$this.add(tooltip).bind(settings.hide.event + '.' + pluginName, function(){
-						
-						hideTimeout = setTimeout(function(){
-							tooltip.stop(true, true)[settings.hide.method](settings.hide.speed);						   
-						}, settings.hide.timeout );
-					
-					}).bind('mouseenter', function(){
-						var elem;
-						if ( activeElement !== elements.target ) {
-							activeElement = elements.target;
-							for ( var i = 0, count = collection.length - 1; i < count; i++) {
-		  						collection[i] == elements.tooltip && (elem = collection.splice(i,1)[0]);
-								collection[i].css('z-index', 1000 + i);								
-							}
-	 						elem.css('z-index', 1000 + collection.length + 10)
-	 						collection.push(elem);
-						}
-					});
-					
-					if ( ! $(window).data('mustard')) {
-						var windowTimeout;
-						$(window).bind('resize.' + pluginName + ' scroll.' + pluginName, function(){
-							clearTimeout(windowTimeout);
-							setTimeout(function(){
-								$('.mustardized')[pluginName]('updatePosition');
-							}, 500);
-						});
-						$(window).data(pluginName, true);
-					}
+				if ( options && options.css && options.css.inner ) {
+					$.extend(innerCss, options.css.inner )
+				}
 
 				
+				// Get tooltip
+				if ( data ) {
+					
+					settings.content && data.elements.wrap.html( settings.content ) && methods.updatePosition.call( data.tooltip );
+					
+					// Grab tooltip
+					methods.show.call($this);
+					return;
+				}
+
+				// This tooltip is new so increment the id
+				id++;
+				
+				// Create tooltip
+				tooltip = tooltipTemplate.clone();
+
+				// Collect references to each element of the tooltip
+				elements = {
+					tooltip : tooltip,
+					content : tooltip.find('.' + pluginName + '-content').css($.extend(outerCss, { 'width' : 'auto'})),
+					wrap : tooltip.find('.' + pluginName + '-wrap').css($.extend(innerCss, { 'width' : 'auto'})).html( settings.content || $this.attr('title') ),
+					arrow : tooltip.find('.' + pluginName + '-arrow').css(settings.arrow),
+					target : $this
+				}
+				
+				// Create data object
+				data = {
+					elements : elements,
+					settings : $.extend(true, {}, settings, outerCss, innerCss),
+					id: id
+				}
+
+				// Remove title attribute
+				$this.removeAttr('title');
+				
+				// Add tooltip to body 
+				elements.tooltip.appendTo('body');
+				
+				// Create arrow
+				var w = parseInt(settings.arrow.width, 10),
+					h = parseInt(settings.arrow.height, 10),
+					a = parseFloat(settings.angle);
+
+				switch ( opposites[settings.position] ) {
+					case 'left':
+						elements.arrow.html(methods.createArrow( w, h, [[0, h * a], [w, h], [w, 0]], outerCss['background-color']));
+						break;
+					
+					case 'right':
+
+						elements.arrow.html( methods.createArrow( w, h, [[w, h * a], [0, h], [0, 0]], outerCss['background-color']));
+						break;
+
+					case 'top':
+
+						elements.arrow.html( methods.createArrow( w, h, [[w * a, 0], [0, h], [w, 9]], outerCss['background-color']));
+						break;
+
+					case 'bottom':
+
+						elements.arrow.html( methods.createArrow( w, h, [[w * a, h], [0, 0], [w, 0]], outerCss['background-color']));
+						break;
+				}
+
+				// Pad tooltip so it doesn't overlap the arrow
+				elements.tooltip.css('padding-' + opposites[ settings.position ], w);
+				
+				// Position the arrow
+				methods.positionArrow( data );
+
+				if ( settings.show.event ) {
+					// Bind hide and show events
+					$this.add(tooltip).bind(settings.show.event + '.' + pluginName, function() {
+
+						
+						methods.updatePosition.call( elements.target )
+						// Stop from hiding tooltip
+						clearTimeout(hideTimeout);
+						setTimeout(function(){
+					 
+							tooltip.stop(true, true)[settings.show.method](settings.show.speed);
+						}, settings.show.timeout );
+					
+					});						   
+				} else {
+					tooltip[settings.show.method](settings.show.speed);
+				}
+				
+				$this.add(tooltip).bind(settings.hide.event + '.' + pluginName, function(){
+					
+					hideTimeout = setTimeout(function(){
+						tooltip.stop(true, true)[settings.hide.method](settings.hide.speed);						   
+					}, settings.hide.timeout );
+				
+				}).bind('mouseenter', function(){
+					var elem;
+					if ( activeElement !== elements.target ) {
+						activeElement = elements.target;
+						for ( var i = 0, count = collection.length - 1; i < count; i++) {
+	  						collection[i] == elements.tooltip && (elem = collection.splice(i,1)[0]);
+							collection[i].css('z-index', 1000 + i);								
+						}
+ 						elem.css('z-index', 1000 + collection.length + 10)
+ 						collection.push(elem);
+					}
+				});
+				
+				$(window).bind('resize.' + pluginName + ' scroll.' + pluginName, function(){
+					clearTimeout(windowTimeout);
+					windowTimeout = setTimeout(function(){
+						methods.updatePosition.call( data.elements.target );
+					}, 200);
+				});
 
 				// Position tooltip
 				elements.tooltip.position({
 					'my' : opposites[settings.position],
 					'at' : settings.position,
 					'of' : $this,
-					'collision' : 'fit'
+					'collision' : 'none'
 				});
 
+				elements.tooltip.width(elements.tooltip.width());
 
 				if ( settings.show.event ) {
 					elements.tooltip.hide();
 				}
 
-				// Test
-				var newLeft = parseInt(elements.tooltip.css('left'), 10) + q;
-				var newTop = parseInt(elements.tooltip.css('top'), 10) + r;
-				elements.tooltip.css({
-					left : newLeft,
-					top : newTop
-				});
-
-
-
 
 				// Save it to element
 				$this.addClass('mustardized');
+				$this.data( pluginName, data);
 				
+				// Add it to local collection of all tooltips for z-indexing
 				collection.push(elements.tooltip);
+			},
+			
+			createArrow : function( width, height, points, color ) {
+			
+				var elem, ctx, path;
+			
+				// If canvas is supported, use it
+				if ( support.canvas ) {
+					
+					// Create element
+					elem = $('<canvas />', {
+						css : {
+							position : 'absolute'
+						}
+					}).attr({
+						width	: width,
+						height	: height,
+					});
+					
+					// Create draw and fill shape
+					ctx = elem[0].getContext('2d');
+					ctx.fillStyle = color;
+					ctx.beginPath();
+					ctx.moveTo(points[0][0], points[0][1]);
+					ctx.lineTo(points[1][0], points[1][1]);
+					ctx.lineTo(points[2][0], points[2][1]);
+					ctx.fill();
+
+				// Otherwise fallback to vml
+				} else {
+
+					path = 'm' + points[0][0] + ',' + points[0][1];
+					path += ' l' + points[1][0] + ',' + points[1][1];
+					path += ' ' + points[2][0] + ',' + points[2][1];
+					path += ' xe';
+
+					elem = '<v:shape fillcolor="' + color + '" stroked="false" filled="true" path="' + path + '" coordsize="' + width + ',' + height + '" ' +
+							'style="width:' + width + 'px; height:' + height + 'px;line-height:0.1px; display:inline-block; behavior:url(#default#VML);position: absolute; top: -1px;"></v:shape>';
+				
+				}
+			
+				return elem;
+			
 			},
 			hide : function( callback ) {
 				var data = $(this).data( pluginName );
 				data && data.elements.tooltip[ data.settings.hide.method ]( data.settings.hide.speed , ( callback || data.settings.hide.callback || $.noop ));
-
-
-
-
 
 			},
 			show : function( callback ) {
@@ -419,10 +319,6 @@
 			destroy : function() {
 				
 				if ( data ) {
-
-
-
-
 					// Unbind window resize
 					$(window).unbind('.' + pluginName + data.id);
 					
@@ -438,27 +334,16 @@
 
 			},
 			positionArrow : function( data ) {
-				var angle = data.settings.angle;
-				switch ( data.settings.position ) {
-				
-					case 'left':
-					case 'right':
-						data.elements.arrow.css({
-							top : (data.elements.tooltip.height() * angle ) - ( parseInt( data.settings.arrow.height, 10 ) * angle )
-						});
-						break;
+				var angle = data.settings.angle,
+					css =  /^(?:left|right)/.test(data.settings.position) ? {
+						top : (data.elements.tooltip.height() * angle ) - ( parseInt( data.settings.arrow.height, 10 ) * angle )
+					} : {
+						left : (data.elements.tooltip.width() * angle ) - ( parseInt(data.settings.arrow.width, 10 ) * angle )
+					}
 
-					case 'top':
-					case 'bottom':
-						data.elements.arrow.css({
-							left : (data.elements.tooltip.width() * angle ) - ( parseInt(data.settings.arrow.width, 10 ) * angle )
-						});
-						break;
-				}
-			
+				data.elements.arrow.css(opposites[data.settings.position], 0).css(css);
 			},
 			updatePosition : function() {
-
 				var data = $(this).data( pluginName );
 				if ( data ) {
 					if (data.elements.target.is(':hidden')) {
@@ -471,7 +356,7 @@
 								  'my' : opposites[data.settings.position],
 								  'at' : data.settings.position,
 								  'of' : data.elements.target,
-								  'collision' : 'fit',
+								  'collision' : 'none',
 								  'using' : function( css ) {
 								 	methods.positionArrow( data );
 								  	data.elements.tooltip.animate(css);
@@ -485,7 +370,7 @@
 							 'my' : opposites[data.settings.position],
 							 'at' : data.settings.position,
 							 'of' : data.elements.target,
-							 'collision' : 'fit',
+							 'collision' : 'none',
 							 'using' : function( css ) {
 							 	methods.positionArrow( data );
 								data.elements.tooltip.css(css).hide().css({
@@ -510,8 +395,6 @@
 			var value
 			,	$this = $(this);
 			
-			data = $this.data( pluginName );
-
 			if ( methods[method] ) {
 				value = methods[method].apply( this, Array.prototype.slice.call( args, 1 ));
 			} else if ( typeof method === 'object' || ! method ) {
@@ -520,8 +403,6 @@
 				$.error( 'Method ' +  method + ' does not exist on jQuery.' + pluginName );
 			}
 			
-			$this.data( pluginName, data );
-
 			return value;
 		});
 	};

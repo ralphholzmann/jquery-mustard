@@ -234,7 +234,7 @@
 					}
 				});
 				
-				$(window).bind('resize.' + pluginName + ' scroll.' + pluginName, function(){
+				$(window).bind('resize.' + pluginName, function(){
 					clearTimeout(windowTimeout);
 					windowTimeout = setTimeout(function(){
 						methods.updatePosition.call( data.elements.target );
@@ -278,7 +278,7 @@
 						}
 					}).attr({
 						width	: width,
-						height	: height,
+						height	: height
 					});
 					
 					// Create draw and fill shape

@@ -77,7 +77,7 @@
 					'-webkit-border-radius' : '3px',
 					'-webkit-background-clip' : 'padding',
 					'border-radius' : '3px',
-					'max-width' : '200px'
+					'max-width' : '250px'
 				}
 			},
 			'arrow' : {
@@ -107,7 +107,7 @@
 				var settings = options ? $.extend(true, {}, defaults, options ) : defaults,
 					$this = $(this),
 					data = $this.data( pluginName ),
-					windowTimeout, tooltip, elements, hideTimeout, outerCss, innerCss;
+					windowTimeout, tooltip, elements, hideTimeout, outerCss, innerCss, wasHidden, display;
 					
 				
 				if ( options && options.css && options.css.theme ) {
@@ -130,7 +130,14 @@
 				// Get tooltip
 				if ( data ) {
 					
-					settings.content && data.elements.wrap.html( settings.content ) && methods.updatePosition.call( data.tooltip );
+					
+					// Update content
+					if ( settings.content ) {
+						data.elements.wrap.html( settings.content );
+					}
+				
+
+					methods.updatePosition.call( data.elements.target );
 					
 					// Grab tooltip
 					methods.show.call($this);
@@ -143,12 +150,13 @@
 				// Create tooltip
 				tooltip = tooltipTemplate.clone();
 
+
 				// Collect references to each element of the tooltip
 				elements = {
 					tooltip : tooltip,
 					content : tooltip.find('.' + pluginName + '-content').css($.extend(outerCss, { 'width' : 'auto'})),
 					wrap : tooltip.find('.' + pluginName + '-wrap').css($.extend(innerCss, { 'width' : 'auto'})).html( settings.content || $this.attr('title') ),
-					arrow : tooltip.find('.' + pluginName + '-arrow').css(settings.arrow),
+					arrow : tooltip.find('.' + pluginName + '-arrow'),
 					target : $this
 				}
 				
@@ -172,22 +180,39 @@
 
 				switch ( opposites[settings.position] ) {
 					case 'left':
-						elements.arrow.html(methods.createArrow( w, h, [[0, h * a], [w, h], [w, 0]], outerCss['background-color']));
+						elements.arrow.html(methods.createArrow( w, h, [[0, h * a], [w, h], [w, 0]], outerCss['background-color']))
+							.css({
+								width : w,
+								height: h
+							});
 						break;
 					
 					case 'right':
 
-						elements.arrow.html( methods.createArrow( w, h, [[w, h * a], [0, h], [0, 0]], outerCss['background-color']));
+						elements.arrow.html( methods.createArrow( w, h, [[w, h * a], [0, h], [0, 0]], outerCss['background-color']))
+							.css({
+								width : w,
+								height: h
+							});
 						break;
 
 					case 'top':
 
-						elements.arrow.html( methods.createArrow( w, h, [[w * a, 0], [0, h], [w, 9]], outerCss['background-color']));
+						elements.arrow.html( methods.createArrow( h, w, [[h * a, 0], [0, w], [h, w]], outerCss['background-color']))
+							.css({
+								width : h,
+								height: w
+							});
 						break;
 
 					case 'bottom':
 
-						elements.arrow.html( methods.createArrow( w, h, [[w * a, h], [0, 0], [w, 0]], outerCss['background-color']));
+						elements.arrow
+							.html( methods.createArrow( h, w, [[h * a, w], [0, 0], [h, 0]], outerCss['background-color']))
+							.css({
+								width : h,
+								height: w
+							});
 						break;
 				}
 
@@ -234,7 +259,7 @@
 					}
 				});
 				
-				$(window).bind('resize.' + pluginName, function(){
+				$(window).bind('resize.' + pluginName + ' scroll.' + pluginName, function(){
 					clearTimeout(windowTimeout);
 					windowTimeout = setTimeout(function(){
 						methods.updatePosition.call( data.elements.target );
@@ -249,7 +274,7 @@
 					'collision' : 'none'
 				});
 
-				elements.tooltip.width(elements.tooltip.width());
+				methods.lock( elements.tooltip );
 
 				if ( settings.show.event ) {
 					elements.tooltip.hide();
@@ -266,7 +291,8 @@
 			
 			createArrow : function( width, height, points, color ) {
 			
-				var elem, ctx, path;
+				var elem, ctx, path, t;
+
 			
 				// If canvas is supported, use it
 				if ( support.canvas ) {
@@ -292,15 +318,19 @@
 
 				// Otherwise fallback to vml
 				} else {
+					points = $.map(points, function( i ){
+						return $.map(i, function( r ){
+							return parseInt( r, 10 );
+						});
+					});
 
-					path = 'm' + points[0][0] + ',' + points[0][1];
-					path += ' l' + points[1][0] + ',' + points[1][1];
-					path += ' ' + points[2][0] + ',' + points[2][1];
+					path = 'm' + points[0] + ',' + points[1];
+					path += ' l' + points[2] + ',' + points[3];
+					path += ' ' + points[4] + ',' + points[5];
 					path += ' xe';
 
-					elem = '<v:shape fillcolor="' + color + '" stroked="false" filled="true" path="' + path + '" coordsize="' + width + ',' + height + '" ' +
-							'style="width:' + width + 'px; height:' + height + 'px;line-height:0.1px; display:inline-block; behavior:url(#default#VML);position: absolute; top: -1px;"></v:shape>';
-				
+					elem = '<v:shape height="' + height + '" width="' + width + '" fillcolor="' + color + '" stroked="false" filled="true" path="' + path + '" coordsize="' + width + ',' + height + '" ' +
+							'style="width:' + width + 'px; height:' + height + 'px;line-height:0.1px; display:inline-block; behavior:url(#default#VML);position: absolute; "></v:shape>';
 				}
 			
 				return elem;
@@ -338,10 +368,19 @@
 					css =  /^(?:left|right)/.test(data.settings.position) ? {
 						top : (data.elements.tooltip.height() * angle ) - ( parseInt( data.settings.arrow.height, 10 ) * angle )
 					} : {
-						left : (data.elements.tooltip.width() * angle ) - ( parseInt(data.settings.arrow.width, 10 ) * angle )
+						left : (data.elements.tooltip.width() * angle ) - ( parseInt(data.settings.arrow.height, 10 ) * angle )
 					}
-
+				
+				if ( ! support.canvas ) {
+				
+					css[opposites[data.settings.position]] = '1px';
+				
+				}
+				
 				data.elements.arrow.css(opposites[data.settings.position], 0).css(css);
+			},
+			lock : function( elem ) {
+				elem.width( elem.width() + 1);
 			},
 			updatePosition : function() {
 				var data = $(this).data( pluginName );
@@ -352,6 +391,9 @@
 					}
 					if (data.elements.tooltip.is(':visible')) {
 						if ( ! data.elements.tooltip.is(':animated')) {
+
+								data.elements.tooltip.css('width', 'auto');
+								methods.lock( data.elements.tooltip );
 							  data.elements.tooltip.position({
 								  'my' : opposites[data.settings.position],
 								  'at' : data.settings.position,
@@ -364,20 +406,26 @@
 						 	});
 						}
 					} else {
-						 data.elements.tooltip.css({
-							'visibility' : 'hidden'
-						}).show().position({
-							 'my' : opposites[data.settings.position],
-							 'at' : data.settings.position,
-							 'of' : data.elements.target,
-							 'collision' : 'none',
-							 'using' : function( css ) {
-							 	methods.positionArrow( data );
-								data.elements.tooltip.css(css).hide().css({
-									'visibility' : 'visible'										
-								});
-							}
-						});
+						data.elements.tooltip
+							.css('visibility', 'hidden')
+							.show()
+							.css('width', 'auto');
+
+						methods.lock( data.elements.tooltip );
+
+						data.elements.tooltip
+							.position({
+								'my' : opposites[data.settings.position],
+								'at' : data.settings.position,
+								'of' : data.elements.target,
+								'collision' : 'none',
+								'using' : function( css ) {
+									methods.positionArrow( data );
+									data.elements.tooltip.css(css).hide().css({
+										'visibility' : 'visible'										
+									});
+								}
+							});
 					}				
 				}
 			},

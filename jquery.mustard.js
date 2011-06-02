@@ -1,4 +1,5 @@
 (function($, window, pluginName, undefined) {
+
   var collection = [],
     activeElement,
     support = {
@@ -130,12 +131,10 @@
         // Get tooltip
         if ( data ) {
           
-          
           // Update content
           if ( settings.content ) {
             data.elements.wrap.html( settings.content );
           }
-        
 
           methods.updatePosition.call( data.elements.target );
           
@@ -455,21 +454,9 @@
       }
     };
 
-  $.fn[pluginName] = function( method ) {
-    var args = arguments;
+  $.fn[pluginName] = function( method, options ) {
     return this.each(function(){
-      var value
-      , $this = $(this);
-      
-      if ( methods[method] ) {
-        value = methods[method].apply( this, Array.prototype.slice.call( args, 1 ));
-      } else if ( typeof method === 'object' || ! method ) {
-        value = methods.init.apply( this, args );
-      } else {
-        $.error( 'Method ' +  method + ' does not exist on jQuery.' + pluginName );
-      }
-      
-      return value;
+      return ( methods[ method ] || methods.init ).call( this, ( options || method ));
     });
   };
 

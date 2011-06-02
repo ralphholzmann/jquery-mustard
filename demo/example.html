@@ -2,9 +2,13 @@
 <html>
     <head>
         <title>Tests for tooltip plugin</title>
-        <script type="text/javascript" src="jquery.js"></script>
-        <script type="text/javascript" src="jquery.ui.position.js"></script>
-        <script type="text/javascript" src="jquery.mustard.js"></script>
+        <script type="text/javascript" src="//ajax.aspnetcdn.com/ajax/jQuery/jquery-1.6.1.js"></script>
+        <!--
+          We dont need the entire jQueryUI, only the position plugin. I'm just using a CDN
+          so I dont have to submodule jQueryUI for a demo
+        -->
+        <script type="text/javascript" src="//ajax.aspnetcdn.com/ajax/jquery.ui/1.8.13/jquery-ui.js"></script>
+        <script type="text/javascript" src="../jquery.mustard.js"></script>
         <script type="text/javascript">
             $(function(){
 				var themes = [['info', 'left'], ['success', 'right'], ['error', 'top'], ['notice', 'bottom']];

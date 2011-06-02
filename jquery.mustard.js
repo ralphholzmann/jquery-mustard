@@ -4,9 +4,10 @@
     support = {
       canvas : !! document.createElement( 'canvas' ).getContext,
       rgba : (function(){
+        var div;
         try {
-          $('<div />').css('background-color', 'rgba(1,2,3,.4)');
-          return true;
+          div = $('<div />').css('background-color', 'rgba(1,2,3,.4)');
+          return !! (~ div.css('background-color').indexOf('rgba'));
         } catch ( e ) {
           return false;
         }
@@ -96,7 +97,8 @@
         'speed' : 200,
         'timeout' : 1000
       },
-      'position' : 'top'
+      'position' : 'top',
+      'animate' : true
     },
     
     methods = {
@@ -124,7 +126,6 @@
         if ( options && options.css && options.css.inner ) {
           $.extend(innerCss, options.css.inner )
         }
-
         
         // Get tooltip
         if ( data ) {
@@ -290,7 +291,6 @@
       },
       
       updateArrowColor : function( color ) {
-        console.log('here!');
         var data    = $(this).data( pluginName ),
             canvas  = data.elements.arrow.find('canvas'),
             ctx;
@@ -405,7 +405,7 @@
             methods.hide.call(data.elements.target);
             return;
           }
-          if (data.elements.tooltip.is(':visible')) {
+          if ( data.settings.animate && data.elements.tooltip.is(':visible')) {
             if ( ! data.elements.tooltip.is(':animated')) {
 
                 data.elements.tooltip.css('width', 'auto');

@@ -68,11 +68,12 @@
           '-webkit-border-radius' : '6px',
           '-webkit-background-clip' : 'padding',
           'border-radius' : '6px',
-          '-webkit-box-shadow' : '0 0 6px #aaa',
-          '-moz-box-shadow' : '0 0 6px #aaa'
+          '-webkit-box-shadow' : '2px 2px 1px #aaa',
+          'box-shadow' : '2px 2px 1px #aaa',
+          '-moz-box-shadow' : '2px 2px 1px #aaa'
         },
         'inner' : {
-          'font' : '12px/15px "Helvetica Neue", sans-serif',
+          'font' : '11px/13px "Helvetica Neue", sans-serif',
           'padding' : '4px',
           '-moz-border-radius' : '3px',
           '-webkit-border-radius' : '3px',
@@ -107,16 +108,16 @@
       init : function( options ) {
 
         var settings = options ? $.extend(true, {}, defaults, options ) : defaults,
-          $this = $(this),
-          data = $this.data( pluginName ),
-          windowTimeout, tooltip, elements, hideTimeout, outerCss, innerCss, wasHidden, display;
+            $this = $(this),
+            data = $this.data( pluginName ),
+            windowTimeout, tooltip, elements, hideTimeout, outerCss, innerCss, wasHidden, display;
           
         
         if ( options && options.css && options.css.theme ) {
           outerCss = $.extend({}, defaults.css.outer, themes[options.css.theme].outer );
           innerCss = $.extend({}, defaults.css.inner, themes[options.css.theme].inner );
         } else {
-          outerCss = $.extend({}, defaults.css.outer, themes['notice'].outer );
+          outerCss = $.extend({}, defaults.css.outer, themes['notice'].outer )
           innerCss = $.extend({}, defaults.css.inner, themes['notice'].inner );           
         }
 
@@ -158,6 +159,11 @@
           arrow : tooltip.find('.' + pluginName + '-arrow'),
           target : $this
         }
+
+        // Data overrides
+        if ( $this.data("mustard-position") ) {
+          settings.position = $this.data("mustard-position");
+        }
         
         // Create data object
         data = {
@@ -166,9 +172,6 @@
           id: id
         }
 
-        // Remove title attribute
-        $this.removeAttr('title');
-        
         // Add tooltip to body 
         elements.tooltip.appendTo('body');
         
@@ -269,9 +272,7 @@
         elements.tooltip.position({
           'my'        : opposites[settings.position],
           'at'        : settings.position,
-          'of'        : $this,
-          'offset'    : settings.offset || 0,
-          'collision' : 'none'
+          'of'        : $this
         });
 
         methods.lock( elements.tooltip );
@@ -353,12 +354,12 @@
       },
       hide : function( callback ) {
         var data = $(this).data( pluginName );
-        data && data.elements.tooltip[ data.settings.hide.method ]( data.settings.hide.speed , ( callback || data.settings.hide.callback || $.noop ));
+        data && data.elements.tooltip[ data.settings.hide.method ]( ( callback || data.settings.hide.callback || $.noop ));
 
       },
       show : function( callback ) {
         var data = $(this).data( pluginName );
-        data && data.elements.tooltip[ data.settings.show.method ]( data.settings.show.speed , ( callback || data.settings.show.callback || $.noop ));
+        data && data.elements.tooltip[ data.settings.show.method ]( ( callback || data.settings.show.callback || $.noop ));
         
       },
       destroy : function() {
@@ -413,8 +414,6 @@
                   'my' : opposites[data.settings.position],
                   'at' : data.settings.position,
                   'of' : data.elements.target,
-                  'offset'    : data.settings.offset || 0,
-                  'collision' : 'none',
                   'using' : function( css ) {
                   methods.positionArrow( data );
                     data.elements.tooltip.animate(css);
@@ -434,8 +433,6 @@
                 'my' : opposites[data.settings.position],
                 'at' : data.settings.position,
                 'of' : data.elements.target,
-                'offset'    : data.settings.offset || 0,
-                'collision' : 'none',
                 'using' : function( css ) {
                   methods.positionArrow( data );
                   data.elements.tooltip.css(css).hide().css({

@@ -283,7 +283,7 @@
 
 
         // Save it to element
-        $this.addClass('mustardized');
+        $this.addClass('mustardized mustard-visible');
         $this.data( pluginName, data);
         
         // Add it to local collection of all tooltips for z-indexing
@@ -353,13 +353,22 @@
       
       },
       hide : function( callback ) {
-        var data = $(this).data( pluginName );
-        data && data.elements.tooltip[ data.settings.hide.method ]( ( callback || data.settings.hide.callback || $.noop ));
+        var $this = $(this),
+            data  = $this.data( pluginName );
+        if ( data ) {
+          data.elements.tooltip[ data.settings.hide.method ]( ( callback || data.settings.hide.callback || $.noop ));
+          $this.removeClass('mustard-visible');
+        }
 
       },
       show : function( callback ) {
-        var data = $(this).data( pluginName );
-        data && data.elements.tooltip[ data.settings.show.method ]( ( callback || data.settings.show.callback || $.noop ));
+        var $this = $(this),
+            data = $this.data( pluginName );
+
+        if ( data ) {
+          data.elements.tooltip[ data.settings.show.method ]( ( callback || data.settings.show.callback || $.noop ));
+          $this.addClass('mustard-visible');
+        }
         
       },
       destroy : function() {

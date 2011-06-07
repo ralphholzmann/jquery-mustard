@@ -110,7 +110,7 @@
         var settings = options ? $.extend(true, {}, defaults, options ) : defaults,
             $this = $(this),
             data = $this.data( pluginName ),
-            windowTimeout, tooltip, elements, hideTimeout, outerCss, innerCss, wasHidden, display;
+            tooltip, elements, hideTimeout, outerCss, innerCss, wasHidden, display;
           
         
         if ( options && options.css && options.css.theme ) {
@@ -261,12 +261,14 @@
           }
         });
         
-        $(window).bind('resize.' + pluginName + ' scroll.' + pluginName, function(){
-          clearTimeout(windowTimeout);
-          windowTimeout = setTimeout(function(){
-            methods.updatePosition.call( data.elements.target );
-          }, 200);
-        });
+        $(window).bind('resize.' + pluginName + ' scroll.' + pluginName, (function(){
+          var timeout;
+          return function() {
+            timeout = setTimeout(function(){
+              methods.updatePosition.call( data.elements.target );
+            }, 200);
+          }
+        })());
 
         // Position tooltip
         elements.tooltip.position({
@@ -405,15 +407,19 @@
         data.elements.arrow.css(opposites[data.settings.position], 0).css(css);
       },
       lock : function( elem ) {
-        elem.width( elem.width() + 1);
+       // elem.width( elem.width() + 1);
       },
       updatePosition : function() {
         var data = $(this).data( pluginName );
         if ( data ) {
+
+          // Dont display tooltips on hidden elements
           if (data.elements.target.is(':hidden')) {
             methods.hide.call(data.elements.target);
             return;
           }
+
+          
           if ( data.settings.animate && data.elements.tooltip.is(':visible')) {
             if ( ! data.elements.tooltip.is(':animated')) {
 
@@ -430,6 +436,7 @@
               });
             }
           } else {
+
             data.elements.tooltip
               .css('visibility', 'hidden')
               .show()

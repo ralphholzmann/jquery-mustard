@@ -1,11 +1,10 @@
 (function($, window, pluginName, undefined) {
-
   var collection = [],
     activeElement,
     support = {
       canvas : !! document.createElement( 'canvas' ).getContext,
       rgba : (function(){
-        var div;
+      	var div;
         try {
           div = $('<div />').css('background-color', 'rgba(1,2,3,.4)');
           return !! (~ div.css('background-color').indexOf('rgba'));
@@ -68,12 +67,11 @@
           '-webkit-border-radius' : '6px',
           '-webkit-background-clip' : 'padding',
           'border-radius' : '6px',
-          '-webkit-box-shadow' : '2px 2px 1px #aaa',
-          'box-shadow' : '2px 2px 1px #aaa',
-          '-moz-box-shadow' : '2px 2px 1px #aaa'
+          '-webkit-box-shadow' : '0 0 6px #aaa',
+          '-moz-box-shadow' : '0 0 6px #aaa'
         },
         'inner' : {
-          'font' : '11px/13px "Helvetica Neue", sans-serif',
+          'font' : '12px/15px "Helvetica Neue", sans-serif',
           'padding' : '4px',
           '-moz-border-radius' : '3px',
           '-webkit-border-radius' : '3px',
@@ -108,16 +106,16 @@
       init : function( options ) {
 
         var settings = options ? $.extend(true, {}, defaults, options ) : defaults,
-            $this = $(this),
-            data = $this.data( pluginName ),
-            tooltip, elements, hideTimeout, outerCss, innerCss, wasHidden, display;
+          $this = $(this),
+          data = $this.data( pluginName ),
+          windowTimeout, tooltip, elements, hideTimeout, outerCss, innerCss, wasHidden, display;
           
         
         if ( options && options.css && options.css.theme ) {
           outerCss = $.extend({}, defaults.css.outer, themes[options.css.theme].outer );
           innerCss = $.extend({}, defaults.css.inner, themes[options.css.theme].inner );
         } else {
-          outerCss = $.extend({}, defaults.css.outer, themes['notice'].outer )
+          outerCss = $.extend({}, defaults.css.outer, themes['notice'].outer );
           innerCss = $.extend({}, defaults.css.inner, themes['notice'].inner );           
         }
 
@@ -132,10 +130,12 @@
         // Get tooltip
         if ( data ) {
           
+          
           // Update content
           if ( settings.content ) {
             data.elements.wrap.html( settings.content );
           }
+        
 
           methods.updatePosition.call( data.elements.target );
           
@@ -159,11 +159,6 @@
           arrow : tooltip.find('.' + pluginName + '-arrow'),
           target : $this
         }
-
-        // Data overrides
-        if ( $this.data("mustard-position") ) {
-          settings.position = $this.data("mustard-position");
-        }
         
         // Create data object
         data = {
@@ -172,6 +167,9 @@
           id: id
         }
 
+        // Remove title attribute
+        $this.removeAttr('title');
+        
         // Add tooltip to body 
         elements.tooltip.appendTo('body');
         
@@ -261,20 +259,20 @@
           }
         });
         
-        $(window).bind('resize.' + pluginName + ' scroll.' + pluginName, (function(){
-          var timeout;
-          return function() {
-            timeout = setTimeout(function(){
-              methods.updatePosition.call( data.elements.target );
-            }, 200);
-          }
-        })());
+        $(window).bind('resize.' + pluginName + ' scroll.' + pluginName, function(){
+          clearTimeout(windowTimeout);
+          windowTimeout = setTimeout(function(){
+            methods.updatePosition.call( data.elements.target );
+          }, 200);
+        });
 
         // Position tooltip
         elements.tooltip.position({
           'my'        : opposites[settings.position],
           'at'        : settings.position,
-          'of'        : $this
+          'of'        : $this,
+          'offset'    : settings.offset || 0,
+          'collision' : 'none'
         });
 
         methods.lock( elements.tooltip );
@@ -285,7 +283,7 @@
 
 
         // Save it to element
-        $this.addClass('mustardized mustard-visible');
+        $this.addClass('mustardized');
         $this.data( pluginName, data);
         
         // Add it to local collection of all tooltips for z-indexing
@@ -355,22 +353,13 @@
       
       },
       hide : function( callback ) {
-        var $this = $(this),
-            data  = $this.data( pluginName );
-        if ( data ) {
-          data.elements.tooltip[ data.settings.hide.method ]( ( callback || data.settings.hide.callback || $.noop ));
-          $this.removeClass('mustard-visible');
-        }
+        var data = $(this).data( pluginName );
+        data && data.elements.tooltip[ data.settings.hide.method ]( data.settings.hide.speed , ( callback || data.settings.hide.callback || $.noop ));
 
       },
       show : function( callback ) {
-        var $this = $(this),
-            data = $this.data( pluginName );
-
-        if ( data ) {
-          data.elements.tooltip[ data.settings.show.method ]( ( callback || data.settings.show.callback || $.noop ));
-          $this.addClass('mustard-visible');
-        }
+        var data = $(this).data( pluginName );
+        data && data.elements.tooltip[ data.settings.show.method ]( data.settings.show.speed , ( callback || data.settings.show.callback || $.noop ));
         
       },
       destroy : function() {
@@ -407,19 +396,15 @@
         data.elements.arrow.css(opposites[data.settings.position], 0).css(css);
       },
       lock : function( elem ) {
-       // elem.width( elem.width() + 1);
+        elem.width( elem.width() + 1);
       },
       updatePosition : function() {
         var data = $(this).data( pluginName );
         if ( data ) {
-
-          // Dont display tooltips on hidden elements
           if (data.elements.target.is(':hidden')) {
             methods.hide.call(data.elements.target);
             return;
           }
-
-          
           if ( data.settings.animate && data.elements.tooltip.is(':visible')) {
             if ( ! data.elements.tooltip.is(':animated')) {
 
@@ -429,6 +414,8 @@
                   'my' : opposites[data.settings.position],
                   'at' : data.settings.position,
                   'of' : data.elements.target,
+                  'offset'    : data.settings.offset || 0,
+                  'collision' : 'none',
                   'using' : function( css ) {
                   methods.positionArrow( data );
                     data.elements.tooltip.animate(css);
@@ -436,7 +423,6 @@
               });
             }
           } else {
-
             data.elements.tooltip
               .css('visibility', 'hidden')
               .show()
@@ -449,6 +435,8 @@
                 'my' : opposites[data.settings.position],
                 'at' : data.settings.position,
                 'of' : data.elements.target,
+                'offset'    : data.settings.offset || 0,
+                'collision' : 'none',
                 'using' : function( css ) {
                   methods.positionArrow( data );
                   data.elements.tooltip.css(css).hide().css({
@@ -467,9 +455,21 @@
       }
     };
 
-  $.fn[pluginName] = function( method, options ) {
+  $.fn[pluginName] = function( method ) {
+    var args = arguments;
     return this.each(function(){
-      return ( methods[ method ] || methods.init ).call( this, ( options || method ));
+      var value
+      , $this = $(this);
+      
+      if ( methods[method] ) {
+        value = methods[method].apply( this, Array.prototype.slice.call( args, 1 ));
+      } else if ( typeof method === 'object' || ! method ) {
+        value = methods.init.apply( this, args );
+      } else {
+        $.error( 'Method ' +  method + ' does not exist on jQuery.' + pluginName );
+      }
+      
+      return value;
     });
   };
 

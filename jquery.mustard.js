@@ -285,7 +285,12 @@
 
 
         // Save it to element
-        $this.addClass('mustardized mustard-visible');
+        try {
+          $this.addClass('mustardized mustard-visible');
+        } catch(e) {
+          //whoops, guess it's some weird thing we can't add a class to
+          //i.e. svg objects in FF 3.6?
+        }
         $this.data( pluginName, data);
         
         // Add it to local collection of all tooltips for z-indexing
